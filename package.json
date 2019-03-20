@@ -1,0 +1,18 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "Mine Sweeper Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "ws" : "node_modules/.bin/ws"
+  },
+  "keywords": [
+    "minesweeper"
+  ],
+  "author": "Slava Kapustin",
+  "license": "ISC",
+  "dependencies": {
+    "local-web-server": "^2.6.1"
+  }
+}
