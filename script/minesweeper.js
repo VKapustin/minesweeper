@@ -5,24 +5,24 @@ let grid;
 const config = {
     level: {
         beginner: {
+            name: 'Beginner',
             columns: 9,
             rows: 9,
-            mines: 10,
+            mines: 10
         },
         medium: {
+            name: 'Medium',
             columns: 22,
             rows: 15,
-            mines: 40,
+            mines: 40
         },
         advanced: {
+            name: 'Advanced',
             columns: 30,
             rows: 15,
-            mines: 80,
+            mines: 80
         }
     },
-    columns: 9,
-    rows: 9,
-    mines: 10,
 
     // Selectors
     fieldId: 'field',
@@ -33,6 +33,8 @@ const config = {
     dialogId: 'dialog',
     containerId: 'container',
     flagged: 'flagged',
+    select: 'selection',
+    option: 'opt',
 
     // Text
     buttonText: 'Reset Game',
@@ -41,8 +43,21 @@ const config = {
     youWon: 'You found all mines!',
 
     // Functions
-    fieldWidth: () => Math.floor(config.columns * 54.15),
-    fieldHeight: () => Math.floor(config.rows * 54.15 + 54.15)
+    fieldWidth: () => Math.floor(level.columns * 54.15),
+    fieldHeight: () => Math.floor(level.rows * 54.15 + 54.15)
+};
+
+// By default the level is beginner
+let level = config.level.beginner;
+
+// Function changes game level: Beginner -> Medium -> Advanced
+const levelChanged = (changes) => {
+    const lev = changes.target.value;
+
+    if (lev) {
+        level = config.level[lev];
+        renderMineField();
+    }
 };
 
 // Function update counted on menu bar
@@ -66,8 +81,8 @@ const updateCounter = () => {
 // Example: [4, 5] or for columns and rows > 10 it will be string '0405'
 // Used to match web element id to map (grid) id, and map (grid) id to web element id
 const resolveId = (id, getString = false) => {
-    const rowLength = (config.rows - 1).toString().length;
-    const colLength = (config.columns - 1).toString().length;
+    const rowLength = (level.rows - 1).toString().length;
+    const colLength = (level.columns - 1).toString().length;
 
     if (getString) {
         const rowStrArr = id[0].toString().split('');
@@ -101,7 +116,7 @@ const click = (event) => {
         closeDialog();
     }
 
-    if (!grid.gameOver && !grid.dialogOpen && id !== config.menuId) {
+    if (!grid.gameOver && !grid.dialogOpen && id !== config.menuId && id !== config.select) {
         const nId = resolveId(id);
         const mappedCell = grid.map[nId[0]][nId[1]];
         const clickedCell = document.getElementById(id);
@@ -207,10 +222,27 @@ function createMenu() {
     resetButton.innerText = config.buttonText;
     menuWrapper.appendChild(resetButton);
 
+    // Add level selection
+    const select = document.createElement('select');
+    select.id = config.select;
+    select.onchange = levelChanged;
+    for (let op in config.level) {
+        const option = document.createElement('option');
+        option.className = config.option;
+        option.value = op;
+        option.innerText = config.level[op].name;
+
+        if (level === config.level[op]) {
+            option.selected = 'selected';
+        }
+        select.appendChild(option);
+    }
+    menuWrapper.appendChild(select);
+
     // Add counter
     const counter = document.createElement('div');
     counter.id = config.counterId;
-    counter.innerText = '0 / ' + config.mines;
+    counter.innerText = '0 / ' + level.mines;
     menuWrapper.appendChild(counter);
 
     return menuWrapper;
@@ -230,10 +262,10 @@ function createMineField() {
 // Function populates mines and creates cells (grid) on the mine field
 // @mineField - web element that represents mine field
 function populateMines(mineField) {
-    grid = new Grid(config.rows, config.columns, config.mines);
+    grid = new Grid(level.rows, level.columns, level.mines);
 
-    for (let i = 0; i < config.rows; i++) {
-        for (let j = 0; j < config.columns; j++) {
+    for (let i = 0; i < level.rows; i++) {
+        for (let j = 0; j < level.columns; j++) {
             const cell = document.createElement('div');
             cell.id = resolveId([i, j], true);
             cell.className = config.cellClass;
